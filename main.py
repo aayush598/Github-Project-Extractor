@@ -14,7 +14,7 @@ from database.db import (
     insert_project,
     insert_features,
     insert_tech_stack,
-    insert_ideated_features,  # ⬅️ Make sure this exists in db.py
+    insert_ideated_features,
 )
 from utils.helpers import parse_llm_summary
 from github_search import search_similar_repositories
@@ -101,6 +101,7 @@ with tab_multi:
             st.markdown(f"- **[{r['name']}]({r['url']})**")
 
         aggregated_features = []
+        aggregated_tech_stack = []
 
         for repo in repo_candidates:
             st.write("---")
@@ -114,20 +115,26 @@ with tab_multi:
 
             repo_data = parse_repo(local_path)
 
-            with st.spinner("Extracting features…"):
+            with st.spinner("Extracting features and tech stack…"):
                 summary = extract_features_and_techstack(repo_data)
-            features, _ = parse_llm_summary(summary)
+
+            features, tech_stack = parse_llm_summary(summary)
 
             if features:
                 st.markdown("**Extracted Features:**")
                 for f in features:
                     st.markdown(f"- {f}")
                 aggregated_features.extend(features)
-            else:
-                st.info("_No features extracted._")
 
-        # ── Aggregate & deduplicate ──────────────────────
+            if tech_stack:
+                st.markdown("**Extracted Tech Stack:**")
+                for t in tech_stack:
+                    st.markdown(f"`{t}`")
+                aggregated_tech_stack.extend(tech_stack)
+
+        # ── Deduplicate ─────────────────────────────
         unique_features = list(dict.fromkeys(aggregated_features))
+        unique_tech_stack = list(dict.fromkeys(aggregated_tech_stack))
 
         if not unique_features:
             st.warning("No features extracted.")
@@ -137,17 +144,22 @@ with tab_multi:
         for f in unique_features:
             st.markdown(f"- {f}")
 
-        # ── Generate ideas ───────────────────────────────
+        st.subheader("🧰 Aggregated Tech Stack")
+        for t in unique_tech_stack:
+            st.markdown(f"`{t}`")
+
+        # ── Generate new ideas ──────────────────────
         with st.spinner("Generating new features…"):
             ideas_text = suggest_new_features_from_features("\n".join(unique_features))
 
         st.subheader("💡 Suggested New Features")
         st.markdown(ideas_text)
 
-        # ── Store in database ────────────────────────────
-        with st.spinner("Storing in database…"):
+        # ── Store in database ───────────────────────
+        with st.spinner("Storing everything in database…"):
             project_id = insert_project(f"[MultiRepo:{query}]", "virtual")
             insert_features(project_id, unique_features)
+            insert_tech_stack(project_id, unique_tech_stack)
             insert_ideated_features(project_id, ideas_text)
 
         st.success("✅ All data stored!")
