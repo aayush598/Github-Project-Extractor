@@ -1,0 +1,6 @@
+venv
+.env
+cloned_repos
+*/__pycache__
+__pycache__
+*.db
