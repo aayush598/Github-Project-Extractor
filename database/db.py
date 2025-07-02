@@ -39,6 +39,15 @@ def init_db():
         )
     ''')
 
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS ideated_features (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            project_id INTEGER,
+            ideas TEXT,
+            FOREIGN KEY(project_id) REFERENCES projects(id)
+        );
+    ''')
+
     conn.commit()
     conn.close()
 
@@ -69,5 +78,15 @@ def insert_tech_stack(project_id, stack_items):
     c = conn.cursor()
     for item in stack_items:
         c.execute("INSERT INTO tech_stack (project_id, stack_item) VALUES (?, ?)", (project_id, item))
+    conn.commit()
+    conn.close()
+
+def insert_ideated_features(project_id: int, idea_text: str):
+    conn = sqlite3.connect("extracted_data.db")
+    c = conn.cursor()
+    c.execute(
+        "INSERT INTO ideated_features (project_id, ideas) VALUES (?, ?)",
+        (project_id, idea_text),
+    )
     conn.commit()
     conn.close()
