@@ -8,7 +8,7 @@ from utils.helpers import chunk_text
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-def summarize_with_llm(prompt: str, model: str = "llama-3.3-70b-versatile"):
+def summarize_with_llm(prompt: str, model: str = "llama-3.1-8b-instant"):
     try:
         response = client.chat.completions.create(
             messages=[{"role": "user", "content": prompt}],
@@ -49,3 +49,16 @@ def extract_features_and_techstack(repo_data):
 
     final_summary = summarize_with_llm(final_prompt)
     return final_summary
+
+
+
+# extractor/summarizer.py (add below)
+
+def suggest_new_features_from_features(existing_features_text):
+    prompt = (
+        "Given the following extracted features from similar projects, "
+        "suggest new and innovative features for the original idea:\n\n"
+        f"{existing_features_text}\n\n"
+        "### Suggested New Features with descriptions:"
+    )
+    return summarize_with_llm(prompt)
