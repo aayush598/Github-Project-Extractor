@@ -62,15 +62,22 @@ def suggest_new_features_from_features(existing_features_text):
     )
     return summarize_with_llm(prompt)
 
-def suggest_new_tech_stack_from_tech_stack(existing_tech_stack_text):
+def suggest_new_tech_stack_from_tech_stack(existing_tech_stack_text: str, generated_features_text: str) -> str:
     """
-    Suggests new tech stack components based on a list of existing tech stacks from similar projects.
+    Suggests new tech stack components based on a list of existing tech stacks
+    and the generated features for a new project.
+    The output will be a newline-separated list of tech stack items, with no other information.
     """
     prompt = (
-        "Given the following extracted tech stack components from similar projects, "
-        "suggest additional or alternative tech stack components that could be beneficial "
-        "for a new project based on these:\n\n"
+        "Based on the following existing tech stack components from similar projects "
+        "and the generated features for a new project, suggest additional or alternative "
+        "tech stack components that would be most beneficial.\n\n"
+        "Existing Tech Stack:\n"
         f"{existing_tech_stack_text}\n\n"
-        "### Suggested New Tech Stack Components:"
+        "Generated Features for the New Project:\n"
+        f"{generated_features_text}\n\n"
+        "Provide ONLY a list of tech stack components, with each item on a new line. "
+        "Do NOT include any headings, introductory/concluding remarks, explanations, "
+        "code blocks, or any other additional text. Just the tech stack items, one per line."
     )
     return summarize_with_llm(prompt)

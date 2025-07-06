@@ -150,7 +150,7 @@ async def generate_feature_ideas(request: IdeationRequest):
 
         # Generate new tech stack suggestions # <--- NEW CALL
         logger.info("Generating new tech stack suggestions...")
-        suggested_tech_stack = suggest_new_tech_stack_from_tech_stack("\n".join(unique_tech_stack))
+        suggested_tech_stack = suggest_new_tech_stack_from_tech_stack("\n".join(unique_tech_stack), generated_features_text=suggested_features)
         
         # Store in database
         logger.info("Storing results in database...")
