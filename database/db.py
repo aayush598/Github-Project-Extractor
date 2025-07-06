@@ -48,6 +48,16 @@ def init_db():
         );
     ''')
 
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS ideated_tech_stack (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            project_id INTEGER,
+            suggested_tech_stack_text TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (project_id) REFERENCES projects(id)
+        )
+    """)
+
     conn.commit()
     conn.close()
 
@@ -88,5 +98,13 @@ def insert_ideated_features(project_id: int, idea_text: str):
         "INSERT INTO ideated_features (project_id, ideas) VALUES (?, ?)",
         (project_id, idea_text),
     )
+    conn.commit()
+    conn.close()
+
+# New function to insert suggested tech stack
+def insert_ideated_tech_stack(project_id: int, suggested_tech_stack_text: str):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO ideated_tech_stack (project_id, suggested_tech_stack_text) VALUES (?, ?)", (project_id, suggested_tech_stack_text))
     conn.commit()
     conn.close()

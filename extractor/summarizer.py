@@ -50,15 +50,27 @@ def extract_features_and_techstack(repo_data):
     final_summary = summarize_with_llm(final_prompt)
     return final_summary
 
-
-
-# extractor/summarizer.py (add below)
-
 def suggest_new_features_from_features(existing_features_text):
+    """
+    Suggests new features based on a list of existing features from similar projects.
+    """
     prompt = (
         "Given the following extracted features from similar projects, "
         "suggest new and innovative features for the original idea:\n\n"
         f"{existing_features_text}\n\n"
         "### Suggested New Features with descriptions:"
+    )
+    return summarize_with_llm(prompt)
+
+def suggest_new_tech_stack_from_tech_stack(existing_tech_stack_text):
+    """
+    Suggests new tech stack components based on a list of existing tech stacks from similar projects.
+    """
+    prompt = (
+        "Given the following extracted tech stack components from similar projects, "
+        "suggest additional or alternative tech stack components that could be beneficial "
+        "for a new project based on these:\n\n"
+        f"{existing_tech_stack_text}\n\n"
+        "### Suggested New Tech Stack Components:"
     )
     return summarize_with_llm(prompt)

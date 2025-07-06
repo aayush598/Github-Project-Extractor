@@ -11,8 +11,8 @@ from contextlib import asynccontextmanager
 # Import the existing modules (assuming they're in your project)
 from extractor.clone_repo import clone_repo
 from extractor.parse_repo import parse_repo
-from extractor.summarizer import extract_features_and_techstack, suggest_new_features_from_features
-from database.db import init_db, insert_project, insert_features, insert_tech_stack, insert_ideated_features
+from extractor.summarizer import extract_features_and_techstack, suggest_new_features_from_features, suggest_new_tech_stack_from_tech_stack # <--- UPDATED IMPORT
+from database.db import init_db, insert_project, insert_features, insert_tech_stack, insert_ideated_features, insert_ideated_tech_stack # <--- UPDATED IMPORT for DB
 from utils.helpers import parse_llm_summary
 from github_search import search_similar_repositories
 
@@ -55,6 +55,7 @@ class IdeationResponse(BaseModel):
     aggregated_features: List[str]
     aggregated_tech_stack: List[str]
     suggested_features: str
+    suggested_tech_stack: str # <--- NEW FIELD
     total_repos_processed: int
 
 class ErrorResponse(BaseModel):
@@ -146,6 +147,10 @@ async def generate_feature_ideas(request: IdeationRequest):
         # Generate new feature ideas
         logger.info("Generating new feature suggestions...")
         suggested_features = suggest_new_features_from_features("\n".join(unique_features))
+
+        # Generate new tech stack suggestions # <--- NEW CALL
+        logger.info("Generating new tech stack suggestions...")
+        suggested_tech_stack = suggest_new_tech_stack_from_tech_stack("\n".join(unique_tech_stack))
         
         # Store in database
         logger.info("Storing results in database...")
@@ -153,6 +158,7 @@ async def generate_feature_ideas(request: IdeationRequest):
         insert_features(project_id, unique_features)
         insert_tech_stack(project_id, unique_tech_stack)
         insert_ideated_features(project_id, suggested_features)
+        insert_ideated_tech_stack(project_id, suggested_tech_stack) # <--- NEW DB INSERTION
         
         logger.info("Ideation completed successfully")
         
@@ -162,6 +168,7 @@ async def generate_feature_ideas(request: IdeationRequest):
             aggregated_features=unique_features,
             aggregated_tech_stack=unique_tech_stack,
             suggested_features=suggested_features,
+            suggested_tech_stack=suggested_tech_stack, # <--- NEW FIELD IN RESPONSE
             total_repos_processed=len(processed_repos)
         )
         
